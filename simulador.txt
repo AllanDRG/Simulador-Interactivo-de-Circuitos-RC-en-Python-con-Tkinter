@@ -1,0 +1,76 @@
+import tkinter as tk
+from tkinter import ttk
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def simulate_circuit():
+    # Parámetros del circuito RC
+    R = float(entry_resistance.get())
+    C = float(entry_capacitance.get())
+    V0 = float(entry_voltage.get())
+    time_end = float(entry_time.get())
+    steps = 1000
+
+    # Generar el tiempo para la simulación
+    t = np.linspace(0, time_end, steps)
+
+    # Seleccionar el tipo de circuito
+    if circuit_type.get() == "Carga":
+        V_t = V0 * (1 - np.exp(-t / (R * C)))  # Ecuación de carga del capacitor
+    else:
+        V_t = V0 * np.exp(-t / (R * C))  # Ecuación de descarga del capacitor
+
+    # Limpiar el gráfico anterior
+    ax.clear()
+    ax.plot(t, V_t, label=f'{circuit_type.get()} del capacitor')
+    ax.set_title("Simulación de Circuito RC")
+    ax.set_xlabel("Tiempo (s)")
+    ax.set_ylabel("Voltaje (V)")
+    ax.legend()
+    ax.grid()
+
+    # Actualizar la gráfica en la interfaz
+    canvas.draw()
+
+# Configuración de la interfaz gráfica
+root = tk.Tk()
+root.title("Simulador de Circuito RC")
+
+# Frame para la entrada de parámetros
+frame = ttk.Frame(root, padding="10")
+frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+# Campos de entrada
+ttk.Label(frame, text="Resistencia (Ω):").grid(column=0, row=0, sticky=tk.W)
+entry_resistance = ttk.Entry(frame)
+entry_resistance.grid(column=1, row=0, sticky=tk.W)
+
+ttk.Label(frame, text="Capacitancia (F):").grid(column=0, row=1, sticky=tk.W)
+entry_capacitance = ttk.Entry(frame)
+entry_capacitance.grid(column=1, row=1, sticky=tk.W)
+
+ttk.Label(frame, text="Voltaje inicial (V):").grid(column=0, row=2, sticky=tk.W)
+entry_voltage = ttk.Entry(frame)
+entry_voltage.grid(column=1, row=2, sticky=tk.W)
+
+ttk.Label(frame, text="Tiempo de simulación (s):").grid(column=0, row=3, sticky=tk.W)
+entry_time = ttk.Entry(frame)
+entry_time.grid(column=1, row=3, sticky=tk.W)
+
+# Selección del tipo de circuito
+circuit_type = tk.StringVar()
+circuit_type.set("Carga")
+ttk.Radiobutton(frame, text="Carga", variable=circuit_type, value="Carga").grid(column=0, row=4, sticky=tk.W)
+ttk.Radiobutton(frame, text="Descarga", variable=circuit_type, value="Descarga").grid(column=1, row=4, sticky=tk.W)
+
+# Botón para iniciar la simulación
+ttk.Button(frame, text="Simular", command=simulate_circuit).grid(column=0, row=5, columnspan=2)
+
+# Gráfico de Matplotlib en la interfaz
+fig, ax = plt.subplots()
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().grid(row=1, column=0)
+
+# Ejecutar la interfaz
+root.mainloop()
